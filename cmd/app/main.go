@@ -10,16 +10,35 @@ import (
 	"syscall"
 	"time"
 
+	"service/db"
+	"service/internal/config"
 	"service/internal/handler"
+	"service/internal/repository"
 	"service/internal/router"
 	"service/internal/server"
+	"service/internal/service"
 )
 
 func main() {
-	// тут создаются config, db, repo, service, handler
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+	pool, err := db.NewPool(ctx, cfg.ConnString())
+	if err != nil {
+		log.Fatal(err)
+	}
+	acc := repository.NewAccountPostgres(pool)
+	service := service.NewAccountService(acc)
+	handlerAccount := handler.NewAccountHandler(service)
 	healthHandler := handler.NewHealthHandler()
+
 	r := router.New(router.Dependencies{
-		HealthHandler: healthHandler,
+		HealthHandler:  healthHandler,
+		AccountHandler: handlerAccount,
 	})
 
 	srv := server.New(":8080", r)
@@ -36,9 +55,6 @@ func main() {
 	<-stop
 
 	log.Println("shutting down server...")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Printf("graceful shutdown failed: %v", err)

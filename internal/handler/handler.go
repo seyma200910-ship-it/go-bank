@@ -8,11 +8,11 @@ import (
 )
 
 type AccountHandler struct {
-	service *service.AccountService
+	accountService *service.AccountService
 }
 
 func NewAccountHandler(s *service.AccountService) *AccountHandler {
-	return &AccountHandler{service: s}
+	return &AccountHandler{accountService: s}
 }
 
 type createRequest struct {
@@ -30,7 +30,7 @@ func (h *AccountHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	acc, err := h.service.CreateAccount(req.OwnerName, req.Balance, req.Currency)
+	acc, err := h.accountService.CreateAccount(r.Context(), req.OwnerName, req.Balance, req.Currency)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

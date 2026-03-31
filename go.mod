@@ -2,7 +2,10 @@ module service
 
 go 1.26.1
 
-require github.com/jackc/pgx/v5 v5.9.1
+require (
+	github.com/jackc/pgx/v5 v5.9.1
+	github.com/lpernett/godotenv v0.0.0-20230527005122-0de1d4c5ef5e
+)
 
 require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect

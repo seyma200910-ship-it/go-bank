@@ -7,7 +7,8 @@ import (
 )
 
 type Dependencies struct {
-	HealthHandler *handler.HealthHandler
+	HealthHandler  *handler.HealthHandler
+	AccountHandler *handler.AccountHandler
 	//ProductHandler *handler.ProductHandler
 	//UserHandler    *handler.UserHandler
 }
@@ -17,6 +18,7 @@ func New(deps Dependencies) http.Handler {
 
 	// --- Health ---
 	mux.HandleFunc("GET /health", deps.HealthHandler.Check)
+	mux.HandleFunc("POST /accounts", deps.AccountHandler.Create)
 
 	//// --- Users ---
 	//mux.HandleFunc("GET /users", deps.UserHandler.List)

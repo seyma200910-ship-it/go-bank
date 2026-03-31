@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:18
+    container_name: bank
+    restart: always
+    environment:
+      POSTGRES_USER:     postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB:       bank
+    ports:
+      - "5435:5432"      # 5433 на хосте, чтобы не конфликтовать с локальным Postgres (если он есть)
+    volumes:
+      - postgres_data:/var/lib/postgresql   # ← КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: монтируем на /var/lib/postgresql (без /data)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
