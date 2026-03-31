@@ -2,10 +2,14 @@ package handler
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
+	"os"
 
 	"service/internal/service"
 )
+
+var logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 type AccountHandler struct {
 	accountService *service.AccountService
@@ -35,7 +39,7 @@ func (h *AccountHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
+	logger.Info("Creat account", "id", acc.ID, "name", acc.OwnerName, "balance", acc.Balance, "crated_at", acc.CreatedAt)
 	json.NewEncoder(w).Encode(acc)
 
 }

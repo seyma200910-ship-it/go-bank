@@ -27,6 +27,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	pool, err := db.NewPool(ctx, cfg.ConnString())
 	if err != nil {
 		log.Fatal(err)
