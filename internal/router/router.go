@@ -19,6 +19,7 @@ func New(deps Dependencies) http.Handler {
 	// --- Health ---
 	mux.HandleFunc("GET /health", deps.HealthHandler.Check)
 	mux.HandleFunc("POST /accounts", deps.AccountHandler.Create)
+	mux.HandleFunc("GET /accounts/{id}", deps.AccountHandler.GetByID)
 
 	//// --- Users ---
 	//mux.HandleFunc("GET /users", deps.UserHandler.List)

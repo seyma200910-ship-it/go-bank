@@ -11,8 +11,11 @@ import (
 	"time"
 
 	"service/db"
+	cahce "service/internal/cache"
 	"service/internal/config"
 	"service/internal/handler"
+	"service/internal/middleware"
+	ratelimit "service/internal/rate_limit"
 	"service/internal/repository"
 	"service/internal/router"
 	"service/internal/server"
@@ -32,8 +35,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	acc := repository.NewAccountPostgres(pool)
-	service := service.NewAccountService(acc)
+	defer pool.Close()
+
+	client, err := db.NewRedisClient(ctx, cfg.ConnStringCache())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	accountRepo := repository.NewAccountPostgres(pool)
+	accountCache := cahce.NewAccountRedis(client)
+
+	service := service.NewAccountService(accountRepo, accountCache)
 	handlerAccount := handler.NewAccountHandler(service)
 	healthHandler := handler.NewHealthHandler()
 
@@ -41,8 +53,10 @@ func main() {
 		HealthHandler:  healthHandler,
 		AccountHandler: handlerAccount,
 	})
-
-	srv := server.New(":8080", r)
+	handler := middleware.LoggerMiddleware(r)
+	rateLimiter := ratelimit.NewRedisRateLimiter(client)
+	handler = middleware.RateLimit(rateLimiter, 5, time.Minute)(handler)
+	srv := server.New(":8080", handler)
 
 	go func() {
 		log.Println("server started on :8080")

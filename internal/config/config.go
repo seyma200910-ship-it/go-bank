@@ -8,21 +8,23 @@ import (
 )
 
 type Config struct {
-	DBHost string
-	DBPort string
-	DBUser string
-	DBPass string
-	DBName string
+	DBHost  string
+	DBPort  string
+	DBUser  string
+	DBPass  string
+	DBName  string
+	DBCPort string
 }
 
 func Load() (cfg Config, err error) {
 	_ = godotenv.Load()
 	cfg = Config{
-		DBHost: os.Getenv("DB_HOST"),
-		DBPort: os.Getenv("DB_PORT"),
-		DBUser: os.Getenv("DB_USER"),
-		DBPass: os.Getenv("DB_PASSWORD"),
-		DBName: os.Getenv("DB_NAME"),
+		DBHost:  os.Getenv("DB_HOST"),
+		DBPort:  os.Getenv("DB_PORT"),
+		DBUser:  os.Getenv("DB_USER"),
+		DBPass:  os.Getenv("DB_PASSWORD"),
+		DBName:  os.Getenv("DB_NAME"),
+		DBCPort: os.Getenv("DBC_PORT"),
 	}
 
 	if cfg.DBHost == "" || cfg.DBPort == "" || cfg.DBUser == "" || cfg.DBName == "" {
@@ -41,5 +43,11 @@ func (c Config) ConnString() string {
 		c.DBHost,
 		c.DBPort,
 		c.DBName,
+	)
+}
+
+func (c Config) ConnStringCache() string {
+	return fmt.Sprintf(
+		"%s:%s", c.DBHost, c.DBCPort,
 	)
 }
